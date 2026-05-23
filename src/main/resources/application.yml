@@ -20,3 +20,5 @@ springdoc:
 jwt:
   expiry: 3600
   secret: mySuperSecretKeymySuperSecretKeymySuperSecretKey
+cookie:
+  expiry: 3600

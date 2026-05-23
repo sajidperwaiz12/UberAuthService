@@ -5,12 +5,15 @@ import com.example.UberAuthService.entities.Passenger;
 import com.example.UberAuthService.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    @Value("${cookie.expiry}")
+    private int cookieExpiry;
 
     @Operation(summary = "Register Passenger")
     @PostMapping("/register/passenger")
@@ -54,20 +59,50 @@ public class AuthController {
 
     @Operation(summary = "Login User")
     @PostMapping("/login")
-    public ApiResponse<LoginResponseDto> login(
+    public ApiResponse<?> login(
             @Valid
             @RequestBody
-            LoginRequestDto request
+            LoginRequestDto loginRequest,
+            HttpServletRequest request,
+            HttpServletResponse response
     ) {
-        return ApiResponse.<LoginResponseDto>builder()
+        LoginResponseDto loginResponse = authService.login(loginRequest);
+        ResponseCookie cookie = ResponseCookie
+                .from("accessToken", loginResponse.getAccessToken())
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .sameSite("Lax")
+                .maxAge(cookieExpiry)
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return ApiResponse.builder()
                 .success(true)
                 .message("Login Successful")
                 .data(
-                        authService.login(request)
+                        loginResponse.getUser()
                 )
                 .build();
     }
 
+    @Operation(summary = "Logout User")
+    @GetMapping("/logout")
+    public ApiResponse<?> logout(HttpServletRequest request, HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie
+                .from("accessToken", "")
+                .httpOnly(true)
+                .secure(false)
+                .path("/")
+                .maxAge(0)
+                .build();
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        return ApiResponse.builder()
+                .success(true)
+                .message("Logged out successfully")
+                .build();
+    }
 
 }
 

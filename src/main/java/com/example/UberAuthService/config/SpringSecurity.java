@@ -1,5 +1,6 @@
 package com.example.UberAuthService.config;
 
+import com.example.UberAuthService.filters.JwtAuthFilter;
 import com.example.UberAuthService.services.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SpringSecurity {
 
+    private final JwtAuthFilter jwtAuthFilter;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -39,15 +42,23 @@ public class SpringSecurity {
                 .cors(
                         AbstractHttpConfigurer::disable
                 )
-                .authorizeHttpRequests(auth ->
-                        auth
-                                .requestMatchers(
-                                        "/swagger-ui/**",
-                                        "/swagger-ui.html",
-                                        "/v3/api-docs/**",
-                                        "api/v1/auth/**"
-                                ).permitAll()
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "api/v1/auth/**"
+                        ).permitAll()
+                        .anyRequest()
+                        .authenticated()
+                )
+                .authenticationProvider(
+                        authenticationProvider()
+                )
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
