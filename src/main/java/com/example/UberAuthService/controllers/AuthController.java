@@ -1,9 +1,6 @@
 package com.example.UberAuthService.controllers;
 
-import com.example.UberAuthService.dto.ApiResponse;
-import com.example.UberAuthService.dto.DriverSignupRequestDto;
-import com.example.UberAuthService.dto.PassengerSignupRequestDto;
-import com.example.UberAuthService.dto.UserResponseDto;
+import com.example.UberAuthService.dto.*;
 import com.example.UberAuthService.entities.Passenger;
 import com.example.UberAuthService.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,6 +51,23 @@ public class AuthController {
                 )
                 .build();
     }
+
+    @Operation(summary = "Login User")
+    @PostMapping("/login")
+    public ApiResponse<LoginResponseDto> login(
+            @Valid
+            @RequestBody
+            LoginRequestDto request
+    ) {
+        return ApiResponse.<LoginResponseDto>builder()
+                .success(true)
+                .message("Login Successful")
+                .data(
+                        authService.login(request)
+                )
+                .build();
+    }
+
 
 }
 

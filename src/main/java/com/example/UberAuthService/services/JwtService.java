@@ -1,5 +1,6 @@
 package com.example.UberAuthService.services;
 
+import com.example.UberAuthService.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -40,8 +41,10 @@ public class JwtService {
                 .compact();
     }
 
-    public String createToken(String email) {
-        return createToken(new HashMap<>(),  email);
+    public String createToken(User user) {
+        HashMap<String, Object> payload = new HashMap<>();
+        payload.put("role", user.getRole().name());
+        return createToken(payload,  user.getEmail());
     }
 
     public Claims extractAllPayloads(String token) {
