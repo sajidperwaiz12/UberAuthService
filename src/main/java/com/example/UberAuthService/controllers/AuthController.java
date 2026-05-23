@@ -2,6 +2,9 @@ package com.example.UberAuthService.controllers;
 
 import com.example.UberAuthService.dto.*;
 import com.example.UberAuthService.entities.Passenger;
+import com.example.UberAuthService.entities.User;
+import com.example.UberAuthService.helpers.AuthUserDetails;
+import com.example.UberAuthService.mapper.UserMapper;
 import com.example.UberAuthService.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +16,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +29,7 @@ public class AuthController {
     private final AuthService authService;
     @Value("${cookie.expiry}")
     private int cookieExpiry;
+    private final UserMapper userMapper;
 
     @Operation(summary = "Register Passenger")
     @PostMapping("/register/passenger")
@@ -101,6 +107,21 @@ public class AuthController {
         return ApiResponse.builder()
                 .success(true)
                 .message("Logged out successfully")
+                .build();
+    }
+
+    @Operation(summary = "Get Current User")
+    @GetMapping("/me")
+    public ApiResponse<UserResponseDto> getCurrentUser(Authentication authentication) {
+        System.out.println(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString());
+        AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();
+
+        return ApiResponse.<UserResponseDto>builder()
+                .success(true)
+                .message("Current user fetched")
+                .data(
+                        userMapper.toResponse(user)
+                )
                 .build();
     }
 

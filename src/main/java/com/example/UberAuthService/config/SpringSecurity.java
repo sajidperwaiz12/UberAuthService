@@ -47,13 +47,12 @@ public class SpringSecurity {
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "api/v1/auth/login",
+                                "/api/v1/auth/register/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "api/v1/auth/**"
+                                "/v3/api-docs/**"
                         ).permitAll()
-                        .anyRequest()
-                        .authenticated()
+                        .anyRequest().authenticated()
                 )
                 .authenticationProvider(
                         authenticationProvider()

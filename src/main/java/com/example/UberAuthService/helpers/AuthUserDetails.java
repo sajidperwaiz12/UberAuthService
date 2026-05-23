@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
-public class AuthUserDetails implements UserDetails {
+public class AuthUserDetails extends User implements UserDetails {
     private final String username; // email
     private final String password;
     private final Collection<? extends GrantedAuthority> authorities;
@@ -17,6 +17,12 @@ public class AuthUserDetails implements UserDetails {
         this.username = user.getEmail();
         this.password = user.getPassword();
         this.authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
+
+        this.setId(user.getId());
+        this.setEmail(user.getEmail());
+        this.setName(user.getName());
+        this.setPhoneNumber(String.valueOf(user.getPhoneNumber()));
+        this.setRole(user.getRole());
     }
 
     @Override
