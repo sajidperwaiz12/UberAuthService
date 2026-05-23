@@ -6,6 +6,7 @@ import com.example.UberAuthService.entities.Passenger;
 import com.example.UberAuthService.entities.User;
 import com.example.UberAuthService.entities.enums.Role;
 import com.example.UberAuthService.exception.EmailAlreadyExistsException;
+import com.example.UberAuthService.exception.InvalidEmailPasswordException;
 import com.example.UberAuthService.exception.PhoneNumberAlreadyExistsException;
 import com.example.UberAuthService.mapper.AuthMapper;
 import com.example.UberAuthService.mapper.DriverMapper;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -77,18 +79,22 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public LoginResponseDto login(LoginRequestDto request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
 
-        if (authentication.isAuthenticated()) {
-            User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
+            if (authentication.isAuthenticated()) {
+                User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
-            String token = jwtService.createToken(user);
-            UserResponseDto userResponseDto = userMapper.toResponse(user);
-            return authMapper.toLoginResponse(token, userResponseDto);
-        } else {
-            throw new UsernameNotFoundException("Invalid email or password");
+                String token = jwtService.createToken(user);
+                UserResponseDto userResponseDto = userMapper.toResponse(user);
+                return authMapper.toLoginResponse(token, userResponseDto);
+            } else {
+                throw new UsernameNotFoundException("Invalid email or password");
+            }
+        } catch (AuthenticationException e) {
+            throw new InvalidEmailPasswordException("Invalid email or password");
         }
     }
 }

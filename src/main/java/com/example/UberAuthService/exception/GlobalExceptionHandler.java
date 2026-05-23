@@ -31,5 +31,16 @@ public class GlobalExceptionHandler {
                 );
     }
 
+    @ExceptionHandler(InvalidEmailPasswordException.class)
+    public ResponseEntity<ApiResponse<?>> handleInvalidEmailPasswordException(InvalidEmailPasswordException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(
+                        ApiResponse.builder()
+                                .success(false)
+                                .message(ex.getMessage())
+                                .build()
+                );
+    }
+
 }
 

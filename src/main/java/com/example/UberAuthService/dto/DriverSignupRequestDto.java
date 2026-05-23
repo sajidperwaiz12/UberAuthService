@@ -38,5 +38,8 @@ public class DriverSignupRequestDto {
 
     @NotBlank
     private String vehicleType;
+
+    @NotBlank
+    private String aadhaarNumber;
 }
 
