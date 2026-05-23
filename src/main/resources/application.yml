@@ -17,3 +17,6 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+jwt:
+  expiry: 3600
+  secret: mySuperSecretKeymySuperSecretKeymySuperSecretKey
