@@ -5,6 +5,7 @@ import com.example.UberAuthService.dto.PassengerSignupRequestDto;
 import com.example.UberAuthService.dto.UserResponseDto;
 import com.example.UberAuthService.entities.Driver;
 import com.example.UberAuthService.entities.Passenger;
+import com.example.UberAuthService.entities.enums.Role;
 import com.example.UberAuthService.exception.EmailAlreadyExistsException;
 import com.example.UberAuthService.exception.PhoneNumberAlreadyExistsException;
 import com.example.UberAuthService.mapper.DriverMapper;
@@ -32,6 +33,7 @@ public class AuthServiceImpl implements AuthService {
 
         Passenger passenger = passengerMapper.toEntity(request);
         passenger.setPassword(passwordEncoder.encode(request.getPassword()));
+        passenger.setRole(Role.PASSENGER);
         Passenger savedPassenger = passengerRepository.save(passenger);
         return passengerMapper.toResponse(savedPassenger);
     }
@@ -42,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
 
         Driver driver = driverMapper.toEntity(request);
         driver.setPassword(passwordEncoder.encode(request.getPassword()));
+        driver.setRole(Role.DRIVER);
         Driver savedDriver = driverRepository.save(driver);
         return driverMapper.toResponse(savedDriver);
     }
